@@ -1,0 +1,1 @@
+export { FarmerCard } from './FarmerCard';
