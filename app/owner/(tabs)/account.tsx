@@ -10,8 +10,13 @@ import {
 import { logoutUser } from '../../../src/services/authService';
 import { useAuth } from '../../../src/context/AuthContext';
 
+import { colors } from '../../../src/theme/colors';
+import { spacing } from '../../../src/theme/spacing';
+import { radius } from '../../../src/theme/radius';
+import { typography } from '../../../src/theme/typography';
+
 export default function AccountScreen() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   async function handleLogout() {
     Alert.alert(
@@ -47,8 +52,17 @@ export default function AccountScreen() {
     );
   }
 
+  const displayName =
+    profile?.name || 'Dairy Owner';
+
+  const email =
+    profile?.email ||
+    user?.email ||
+    '';
+
   return (
     <View style={styles.container}>
+      {/* Header */}
       <Text style={styles.title}>
         Account
       </Text>
@@ -57,27 +71,41 @@ export default function AccountScreen() {
         Manage your dairy account
       </Text>
 
-      {/* User information */}
+      {/* Profile */}
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
-            {user?.email?.charAt(0).toUpperCase() || 'U'}
+            {displayName
+              .charAt(0)
+              .toUpperCase()}
           </Text>
         </View>
 
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>
-            Dairy Owner
+            {displayName}
           </Text>
 
           <Text style={styles.email}>
-            {user?.email}
+            {email}
           </Text>
+
+          <View style={styles.roleBadge}>
+            <Text style={styles.roleText}>
+              Dairy Owner
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Account options */}
-      <TouchableOpacity style={styles.option}>
+      {/* Profile option */}
+      <TouchableOpacity
+        style={styles.option}
+        activeOpacity={0.8}
+        onPress={() => {
+          router.push('/owner/accounts/profile')
+        }}
+      >
         <Text style={styles.optionIcon}>
           👤
         </Text>
@@ -97,7 +125,14 @@ export default function AccountScreen() {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.option}>
+      {/* Dairy information */}
+      <TouchableOpacity
+        style={styles.option}
+        activeOpacity={0.8}
+        onPress={() => {
+          // Dairy information screen will be added later
+        }}
+      >
         <Text style={styles.optionIcon}>
           🏪
         </Text>
@@ -120,6 +155,7 @@ export default function AccountScreen() {
       {/* Logout */}
       <TouchableOpacity
         style={styles.logoutButton}
+        activeOpacity={0.8}
         onPress={handleLogout}
       >
         <Text style={styles.logoutIcon}>
@@ -137,36 +173,37 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9F7',
-    padding: 20,
-    paddingTop: 60,
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xxxl,
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    ...typography.title,
+    color: colors.text,
   },
 
   subtitle: {
-    color: '#777',
-    marginTop: 5,
-    marginBottom: 25,
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xl,
   },
 
   profileCard: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 18,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
 
   avatar: {
-    width: 55,
-    height: 55,
-    borderRadius: 28,
-    backgroundColor: '#E8F5E9',
+    width: 56,
+    height: 56,
+    borderRadius: radius.round,
+    backgroundColor: colors.primaryLight,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -174,31 +211,47 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#2E7D32',
+    color: colors.primaryDark,
   },
 
   profileInfo: {
-    marginLeft: 15,
     flex: 1,
+    marginLeft: spacing.md,
   },
 
   profileName: {
-    fontSize: 17,
-    fontWeight: '700',
+    ...typography.subheading,
+    color: colors.text,
   },
 
   email: {
-    color: '#777',
-    marginTop: 4,
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+
+  roleBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primaryLight,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.round,
+    marginTop: spacing.sm,
+  },
+
+  roleText: {
+    ...typography.caption,
+    fontWeight: '600',
+    color: colors.primaryDark,
   },
 
   option: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 17,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
 
   optionIcon: {
@@ -211,26 +264,27 @@ const styles = StyleSheet.create({
   },
 
   optionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...typography.subheading,
+    color: colors.text,
   },
 
   optionSubtitle: {
-    color: '#777',
-    marginTop: 3,
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
 
   arrow: {
-    fontSize: 27,
-    color: '#aaa',
+    fontSize: 28,
+    color: colors.textDisabled,
   },
 
   logoutButton: {
-    marginTop: 25,
+    marginTop: spacing.lg,
     height: 52,
-    borderRadius: 12,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: '#E53935',
+    borderColor: colors.error,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -238,12 +292,11 @@ const styles = StyleSheet.create({
 
   logoutIcon: {
     fontSize: 18,
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
 
   logoutText: {
-    color: '#E53935',
-    fontSize: 16,
-    fontWeight: '700',
+    ...typography.button,
+    color: colors.error,
   },
 });

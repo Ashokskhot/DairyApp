@@ -151,10 +151,14 @@ export async function getMilkCollectionsByDateRange(
 
 export async function getMilkCollectionHistory(
   dairyId: string,
+  fromDate: string,
+  toDate: string,
 ): Promise<MilkCollection[]> {
   const q = query(
     milkCollectionRef,
     where('dairyId', '==', dairyId),
+    where('date', '>=', fromDate),
+    where('date', '<=', toDate),
     orderBy('date', 'desc'),
   );
 

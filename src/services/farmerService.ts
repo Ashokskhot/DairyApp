@@ -95,3 +95,26 @@ export async function updateFarmer(
     active: data.active,
   });
 }
+
+export async function getFarmerByMobile(
+  mobile: string,
+) {
+  const q = query(
+    collection(db, 'farmers'),
+    where('mobile', '==', mobile.trim()),
+    where('active', '==', true),
+  );
+
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const farmerDoc = snapshot.docs[0];
+
+  return {
+    id: farmerDoc.id,
+    ...farmerDoc.data(),
+  };
+}

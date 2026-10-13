@@ -2,6 +2,7 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
+
 import {
   createContext,
   ReactNode,
@@ -10,8 +11,13 @@ import {
   useState,
 } from 'react';
 
+import {
+  doc,
+  onSnapshot,
+} from 'firebase/firestore';
+
 import { auth } from '../services/authService';
-import { getUserProfile } from '../services/userService';
+import { db } from '../firebase/firestore';
 
 interface UserProfile {
   id: string;
@@ -19,7 +25,9 @@ interface UserProfile {
   email: string;
   role: 'owner' | 'farmer';
   dairyId?: string;
+  farmerId?: string;
   createdAt?: any;
+  updatedAt?: any;
 }
 
 interface AuthContextType {
@@ -28,56 +36,106 @@ interface AuthContextType {
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  profile: null,
-  loading: true,
-});
+const AuthContext =
+  createContext<AuthContextType>({
+    user: null,
+    profile: null,
+    loading: true,
+  });
 
 export function AuthProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] =
+    useState<User | null>(null);
+
   const [profile, setProfile] =
     useState<UserProfile | null>(null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (currentUser) => {
-        try {
+    let unsubscribeProfile:
+      | (() => void)
+      | undefined;
+
+    const unsubscribeAuth =
+      onAuthStateChanged(
+        auth,
+        (currentUser) => {
+          console.log(
+            'Auth state changed:',
+            currentUser?.uid,
+          );
+
           setUser(currentUser);
 
+          // Remove previous profile listener
+          if (unsubscribeProfile) {
+            unsubscribeProfile();
+            unsubscribeProfile = undefined;
+          }
+
+          // User logged out
           if (!currentUser) {
             setProfile(null);
+            setLoading(false);
             return;
           }
 
-          const userProfile = await getUserProfile(
+          // User logged in
+          const profileRef = doc(
+            db,
+            'users',
             currentUser.uid,
           );
 
-          setProfile(
-            userProfile as UserProfile | null,
-          );
-        } catch (error) {
-          console.error(
-            'Failed to load user profile:',
-            error,
-          );
+          unsubscribeProfile =
+            onSnapshot(
+              profileRef,
+              (snapshot) => {
+                if (snapshot.exists()) {
+                  const data =
+                    snapshot.data();
 
-          setProfile(null);
-        } finally {
-          setLoading(false);
-        }
-      },
-    );
+                  setProfile({
+                    id: snapshot.id,
+                    ...data,
+                  } as UserProfile);
+                } else {
+                  console.warn(
+                    'User profile not found:',
+                    currentUser.uid,
+                  );
 
-    return unsubscribe;
+                  setProfile(null);
+                }
+
+                setLoading(false);
+              },
+              (error) => {
+                console.error(
+                  'Profile listener error:',
+                  error,
+                );
+
+                setProfile(null);
+                setLoading(false);
+              },
+            );
+        },
+      );
+
+    return () => {
+      unsubscribeAuth();
+
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+      }
+    };
   }, []);
 
   return (
