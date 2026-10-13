@@ -13,7 +13,7 @@ import {
   SafeAreaProvider,
   SafeAreaView,
 } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 
 import { useAuth } from '../../../src/context/AuthContext';
 import { getFarmers } from '../../../src/services/farmerService';
