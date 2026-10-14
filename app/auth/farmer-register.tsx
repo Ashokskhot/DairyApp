@@ -200,7 +200,7 @@ export default function FarmerRegisterScreen() {
         <ScreenHeader
           title="Farmer Registration"
           showBack
-          onBack={() => router.back()}
+          onBackPress={() => router.back()}
         />
 
         <View style={styles.headerContent}>

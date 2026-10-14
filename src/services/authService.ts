@@ -1,10 +1,14 @@
 import {
   createUserWithEmailAndPassword,
-  getReactNativePersistence,
   initializeAuth,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
+
+// Firebase v12 React Native export: TypeScript may resolve
+// shared declarations that omit this platform-specific export.
+// @ts-expect-error React Native entry exports this function at runtime.
+import { getReactNativePersistence } from 'firebase/auth';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

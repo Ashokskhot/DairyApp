@@ -22,6 +22,16 @@ interface CreateFarmerData {
   milkTypes: FarmerMilkTypes;
 }
 
+export interface FarmerRegistrationRecord {
+  id: string;
+  dairyId: string;
+  name: string;
+  mobile: string;
+  address?: string;
+  milkTypes: FarmerMilkTypes;
+  active: boolean;
+}
+
 export async function createFarmer(
   data: CreateFarmerData,
 ) {
@@ -98,7 +108,7 @@ export async function updateFarmer(
 
 export async function getFarmerByMobile(
   mobile: string,
-) {
+): Promise<FarmerRegistrationRecord | null> {
   const q = query(
     collection(db, 'farmers'),
     where('mobile', '==', mobile.trim()),
@@ -112,9 +122,15 @@ export async function getFarmerByMobile(
   }
 
   const farmerDoc = snapshot.docs[0];
+  const data = farmerDoc.data();
 
   return {
     id: farmerDoc.id,
-    ...farmerDoc.data(),
+    name: data.name as string,
+    dairyId: data.dairyId as string,
+    mobile: data.mobile as string,
+    address: data.address as string | undefined,
+    milkTypes: data.milkTypes as FarmerMilkTypes,
+    active: data.active === true,
   };
 }
